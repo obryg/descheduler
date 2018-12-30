@@ -19,7 +19,7 @@ RUN make
 
 RUN ls -la .
 
-COPY _output/bin/descheduler /bin/descheduler
+RUN cp -r _output/bin/descheduler /bin/
 
 #FROM scratch
 
