@@ -18,7 +18,8 @@ COPY . .
 RUN make
 
 RUN ls -la /go/src
-RUN ls -la /go/bin
+
+COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
 FROM scratch
 
@@ -26,4 +27,4 @@ FROM scratch
 
 #COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
-CMD ["_output/bin/descheduler", "--help"]
+CMD ["/bin/descheduler", "--help"]
