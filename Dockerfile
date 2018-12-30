@@ -21,6 +21,8 @@ FROM scratch
 
 #MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
 
+RUN ls -la /
+
 #COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
 CMD ["_output/bin/descheduler", "--help"]
