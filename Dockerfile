@@ -13,7 +13,7 @@
 # limitations under the License.
 FROM golang:1.10.7
 
-WORKDIR /go/src/github.com/kubernetes-incubator/descheduler/_output
+WORKDIR /go/src/github.com/kubernetes-incubator/descheduler
 
 COPY . .
 
