@@ -14,7 +14,9 @@
 FROM golang:1.10.7
 
 WORKDIR /go/src/github.com/kubernetes-incubator/descheduler/_output
+
 COPY . .
+
 RUN make
 
 RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler/_output
@@ -27,4 +29,4 @@ RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler/_output
 
 #COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
-CMD ["/bin/descheduler", "--help"]
+#CMD ["/bin/descheduler", "--help"]
