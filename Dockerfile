@@ -23,7 +23,7 @@ FROM scratch
 
 RUN ls -la /bin
 
-RUN ls -la /go
+RUN ls -la /go/src
 
 #COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
