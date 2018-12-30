@@ -18,20 +18,20 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: descheduler-sa
+  name: descheduler
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: descehduler-cluster-role-binding
+  name: descheduler-cluster-role-binding
   namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: descheduler-cluster-role
 subjects:
-  - name: descheduler-sa
+  - name: descheduler
     kind: ServiceAccount
     namespace: kube-system
 
