@@ -17,7 +17,7 @@ WORKDIR /go/src/github.com/kubernetes-incubator/descheduler
 COPY . .
 RUN make
 
-#Copy to bin
-RUN cp -r _output/bin/descheduler /bin/
+#Copy descheduler to bin
+RUN cp -r _output/bin/descheduler /bin/; rm -rf .
 
 CMD ["/bin/descheduler", "--help"]
