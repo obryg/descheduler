@@ -22,4 +22,4 @@ RUN cp -r _output/bin/descheduler /bin/
 
 #FROM scratch
 
-CMD ["./bin/descheduler", "--help"]
+CMD ["/bin/descheduler", "--help"]
