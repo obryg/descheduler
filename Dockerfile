@@ -21,7 +21,7 @@ RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler
 
 COPY /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
-#FROM scratch
+FROM scratch
 
 #MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
 
