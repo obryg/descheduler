@@ -17,11 +17,11 @@ WORKDIR /go/src/github.com/kubernetes-incubator/descheduler/_output
 COPY . .
 RUN make
 
-RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler
+RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler/_output
 
-COPY /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
+#COPY /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
-FROM scratch
+#FROM scratch
 
 #MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
 
