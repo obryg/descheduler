@@ -20,6 +20,6 @@ RUN make
 #Copy to bin
 RUN cp -r _output/bin/descheduler /bin/
 
-FROM scratch
+#FROM scratch
 
 CMD ["./bin/descheduler", "--help"]
