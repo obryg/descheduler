@@ -18,6 +18,6 @@ COPY . .
 RUN make
 
 #Copy descheduler to bin
-RUN cp -r _output/bin/descheduler /bin/; rm -rf .
+RUN cp -r _output/bin/descheduler /bin/; rm -rf _output;
 
 CMD ["/bin/descheduler", "--help"]
