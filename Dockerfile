@@ -21,7 +21,7 @@ RUN make
 
 RUN ls -la /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/
 
-COPY /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/* /bin/
+COPY _output/bin/descheduler /bin/descheduler
 
 RUN ls -la /bin
 
