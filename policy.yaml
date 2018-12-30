@@ -1,10 +1,4 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: descheduler
-data:
-  policy.yaml: |-  
-    apiVersion: descheduler/v1alpha1
+apiVersion: descheduler/v1alpha1
     kind: DeschedulerPolicy
     strategies:
       RemoveDuplicates:
