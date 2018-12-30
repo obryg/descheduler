@@ -25,7 +25,7 @@ spec:
             - "/bin/sh"
             - "-c"
             - |
-              _output/bin/descheduler --policy-config-file /policy-dir/policy.yaml
+              _output/bin/descheduler --policy-config-file /policy-dir/configmap-policy.yaml
           restartPolicy: "OnFailure"
           volumes:
           - name: policy-volume
