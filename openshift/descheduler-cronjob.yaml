@@ -4,6 +4,7 @@ metadata:
   name: descheduler
 spec:
   schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   jobTemplate:
