@@ -96,7 +96,7 @@ EOF
 ### Create the service account which will be used to run the job:
 
 ```
-$ oc create sa descheduler-sa -n kube-system
+$ oc create sa descheduler -n kube-system
 ```
 
 ### Bind the cluster role to the service account:
@@ -104,7 +104,7 @@ $ oc create sa descheduler-sa -n kube-system
 ```
 $ oc create clusterrolebinding descheduler-cluster-role-binding \
     --clusterrole=descheduler-cluster-role \
-    --serviceaccount=kube-system:descheduler-sa
+    --serviceaccount=kube-system:descheduler
 ```
 ### Create a configmap to store descheduler policy
 
@@ -115,40 +115,48 @@ so that it can be mounted as a volume inside pod.
 $ oc create configmap descheduler-policy-configmap \
      -n kube-system --from-file=<path-to-policy-dir/policy.yaml>
 ```
-### Create the job specification (descheduler-job.yaml)
+### Create the cronjob specification (descheduler-cronjob.yaml)
 
 ```
-apiVersion: batch/v1
-kind: Job
+kind: CronJob
 metadata:
-  name: descheduler-job
-  namespace: kube-system
+  name: descheduler
 spec:
-  parallelism: 1
-  completions: 1
-  template:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
     metadata:
-      name: descheduler-pod
+      name: descheduler
       annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
+        scheduler.alpha.kubernetes.io/critical-pod: "true"
     spec:
-        containers:
-        - name: descheduler
-          image: descheduler
-          volumeMounts:
-          - mountPath: /policy-dir
-            name: policy-volume
-          command:
-          - "/bin/sh"
-          - "-ec"
-          - |
-            /bin/descheduler --policy-config-file /policy-dir/policy.yaml
-        restartPolicy: "Never"
-        serviceAccountName: descheduler-sa
-        volumes:
-        - name: policy-volume
-          configMap:
-            name: descheduler-policy-configmap
+      template:
+        spec:
+          serviceAccountName: descheduler
+          containers:
+          - name: descheduler
+            image: ${DOCKER_REGISTRY_HOST}:5000/openshift/descheduler:latest
+            volumeMounts:
+            - mountPath: /policy-dir
+              name: policy-volume
+            command:           
+            - "/bin/sh"
+            - "-c"
+            - |
+              /bin/descheduler --v=4 --policy-config-file /policy-dir/configmap-policy.yaml
+          restartPolicy: "OnFailure"
+          volumes:
+          - name: policy-volume
+            configMap:
+              name: descheduler
+parameters:
+- description: docker registry host name
+  displayName: Site domain
+  name: DOCKER_REGISTRY_HOST
+  required: true
+  value: docker-registry.default.svc
 ```
 
 Please note that the pod template is configured with critical pod annotation, and
@@ -156,7 +164,7 @@ the policy `policy-file` is mounted as a volume from the config map.
 
 ### Run the descheduler as a job in a pod:
 ```
-$ oc create -f descheduler-job.yaml
+$ oc create -f descheduler-cronjob.yaml -n kube-system
 ```
 
 ## Policy and Strategies
