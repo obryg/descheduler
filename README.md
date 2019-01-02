@@ -52,7 +52,7 @@ or by kubelet due to an eviction event. Since critical pods are created in
 `kube-system` namespace, descheduler job and its pod will also be created
 in `kube-system` namespace.
 
-###  Create a container image
+###  Create a container image (manually)
 
 First we create a simple Docker image utilizing the Dockerfile found in the root directory:
 
@@ -69,6 +69,16 @@ $ make image
 
 This eliminates the need to have Go installed locally and builds the binary
 within it's own container.
+
+### Import golang docker image from docker hub registry
+```
+oc import-image golang:1.10.7 golang:1.10.7 -n openshift --confirm
+```
+
+### Create openshift build job
+```
+oc new-build <repository_url_with_code> --image-stream=openshift/golang:1.10.7 --strategy=docker -n openshift
+```
 
 ### Create a cluster role
 
