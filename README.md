@@ -5,11 +5,11 @@
 
 ## Introduction
 
-Scheduling in Kubernetes is the process of binding pending pods to nodes, and is performed by
-a component of Kubernetes called kube-scheduler. The scheduler's decisions, whether or where a
+Scheduling in Openshift is the process of binding pending pods to nodes, and is performed by
+a component of Openshift called kube-scheduler. The scheduler's decisions, whether or where a
 pod can or can not be scheduled, are guided by its configurable policy which comprises of set of
 rules, called predicates and priorities. The scheduler's decisions are influenced by its view of
-a Kubernetes cluster at that point of time when a new pod appears first time for scheduling.
+a Openshift cluster at that point of time when a new pod appears first time for scheduling.
 As Kubernetes clusters are very dynamic and their state change over time, there may be desired
 to move already running pods to some other nodes for various reasons:
 
@@ -122,8 +122,7 @@ Descheduler policy is created as a ConfigMap in `kube-system` namespace
 so that it can be mounted as a volume inside pod.
 
 ```
-$ oc create configmap descheduler-policy-configmap \
-     -n kube-system --from-file=<path-to-policy-dir/policy.yaml>
+$ oc create configmap descheduler -n kube-system --from-file=configmap-policy.yaml
 ```
 ### Create the cronjob specification (descheduler-cronjob.yaml)
 
