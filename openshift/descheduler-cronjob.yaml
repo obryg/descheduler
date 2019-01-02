@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: descheduler
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "*/30 * * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
@@ -18,7 +18,7 @@ spec:
           serviceAccountName: descheduler
           containers:
           - name: descheduler
-            image: 172.30.1.1:5000/openshift/descheduler:latest
+            image: ${DOCKER_REGISTRY_HOST}:5000/openshift/descheduler:latest
             volumeMounts:
             - mountPath: /policy-dir
               name: policy-volume
@@ -32,3 +32,9 @@ spec:
           - name: policy-volume
             configMap:
               name: descheduler
+parameters:
+- description: docker registry host name
+  displayName: Site domain
+  name: DOCKER_REGISTRY_HOST
+  required: true
+  value: docker-registry.default.svc
