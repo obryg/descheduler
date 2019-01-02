@@ -13,6 +13,8 @@
 # limitations under the License.
 FROM golang:1.10.7
 
+MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
+
 WORKDIR /go/src/github.com/kubernetes-incubator/descheduler
 COPY . .
 RUN make
