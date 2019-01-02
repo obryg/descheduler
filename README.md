@@ -75,7 +75,7 @@ within it's own container.
 To give necessary permissions for the descheduler to work in a pod, create a cluster role:
 
 ```
-$ cat << EOF| kubectl create -f -
+$ cat << EOF| oc create -f -
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -96,13 +96,13 @@ EOF
 ### Create the service account which will be used to run the job:
 
 ```
-$ kubectl create sa descheduler-sa -n kube-system
+$ oc create sa descheduler-sa -n kube-system
 ```
 
 ### Bind the cluster role to the service account:
 
 ```
-$ kubectl create clusterrolebinding descheduler-cluster-role-binding \
+$ oc create clusterrolebinding descheduler-cluster-role-binding \
     --clusterrole=descheduler-cluster-role \
     --serviceaccount=kube-system:descheduler-sa
 ```
@@ -112,7 +112,7 @@ Descheduler policy is created as a ConfigMap in `kube-system` namespace
 so that it can be mounted as a volume inside pod.
 
 ```
-$ kubectl create configmap descheduler-policy-configmap \
+$ oc create configmap descheduler-policy-configmap \
      -n kube-system --from-file=<path-to-policy-dir/policy.yaml>
 ```
 ### Create the job specification (descheduler-job.yaml)
@@ -156,7 +156,7 @@ the policy `policy-file` is mounted as a volume from the config map.
 
 ### Run the descheduler as a job in a pod:
 ```
-$ kubectl create -f descheduler-job.yaml
+$ oc create -f descheduler-job.yaml
 ```
 
 ## Policy and Strategies
