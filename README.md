@@ -1,15 +1,15 @@
 [![Build Status](https://travis-ci.org/kubernetes-incubator/descheduler.svg?branch=master)](https://travis-ci.org/kubernetes-incubator/descheduler)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-incubator/descheduler)](https://goreportcard.com/report/github.com/kubernetes-incubator/descheduler)
 
-# Descheduler for Openshift
+# Descheduler for Kubernetes
 
 ## Introduction
 
-Scheduling in Openshift is the process of binding pending pods to nodes, and is performed by
-a component of Openshift called kube-scheduler. The scheduler's decisions, whether or where a
+Scheduling in Kubernetes is the process of binding pending pods to nodes, and is performed by
+a component of Kubernetes called kube-scheduler. The scheduler's decisions, whether or where a
 pod can or can not be scheduled, are guided by its configurable policy which comprises of set of
 rules, called predicates and priorities. The scheduler's decisions are influenced by its view of
-a Openshift cluster at that point of time when a new pod appears first time for scheduling.
+a Kubernetes cluster at that point of time when a new pod appears first time for scheduling.
 As Kubernetes clusters are very dynamic and their state change over time, there may be desired
 to move already running pods to some other nodes for various reasons:
 
@@ -52,7 +52,7 @@ or by kubelet due to an eviction event. Since critical pods are created in
 `kube-system` namespace, descheduler job and its pod will also be created
 in `kube-system` namespace.
 
-###  Create a container image (manually)
+###  Create a container image
 
 First we create a simple Docker image utilizing the Dockerfile found in the root directory:
 
@@ -70,22 +70,12 @@ $ make image
 This eliminates the need to have Go installed locally and builds the binary
 within it's own container.
 
-### Import golang docker image from docker hub registry
-```
-oc import-image golang:1.10.7 golang:1.10.7 -n openshift --confirm
-```
-
-### Create openshift build job
-```
-oc new-build <repository_url_with_code> --image-stream=openshift/golang:1.10.7 --strategy=docker -n openshift
-```
-
 ### Create a cluster role
 
 To give necessary permissions for the descheduler to work in a pod, create a cluster role:
 
 ```
-$ cat << EOF| oc create -f -
+$ cat << EOF| kubectl create -f -
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -106,15 +96,15 @@ EOF
 ### Create the service account which will be used to run the job:
 
 ```
-$ oc create sa descheduler -n kube-system
+$ kubectl create sa descheduler-sa -n kube-system
 ```
 
 ### Bind the cluster role to the service account:
 
 ```
-$ oc create clusterrolebinding descheduler-cluster-role-binding \
+$ kubectl create clusterrolebinding descheduler-cluster-role-binding \
     --clusterrole=descheduler-cluster-role \
-    --serviceaccount=kube-system:descheduler
+    --serviceaccount=kube-system:descheduler-sa
 ```
 ### Create a configmap to store descheduler policy
 
@@ -122,50 +112,43 @@ Descheduler policy is created as a ConfigMap in `kube-system` namespace
 so that it can be mounted as a volume inside pod.
 
 ```
-$ oc create configmap descheduler -n kube-system --from-file=configmap-policy.yaml
+$ kubectl create configmap descheduler-policy-configmap \
+     -n kube-system --from-file=<path-to-policy-dir/policy.yaml>
 ```
-### Create the cronjob specification (descheduler-cronjob.yaml)
+### Create the job specification (descheduler-job.yaml)
 
 ```
-kind: CronJob
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: descheduler
+  name: descheduler-job
+  namespace: kube-system
 spec:
-  schedule: "*/30 * * * *"
-  concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 5
-  failedJobsHistoryLimit: 5
-  jobTemplate:
+  parallelism: 1
+  completions: 1
+  template:
     metadata:
-      name: descheduler
+      name: descheduler-pod
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: "true"
     spec:
-      template:
-        spec:
-          serviceAccountName: descheduler
-          containers:
-          - name: descheduler
-            image: ${DOCKER_REGISTRY_HOST}:5000/openshift/descheduler:latest
-            volumeMounts:
-            - mountPath: /policy-dir
-              name: policy-volume
-            command:           
-            - "/bin/sh"
-            - "-c"
-            - |
-              /bin/descheduler --v=4 --policy-config-file /policy-dir/configmap-policy.yaml
-          restartPolicy: "OnFailure"
-          volumes:
-          - name: policy-volume
-            configMap:
-              name: descheduler
-parameters:
-- description: docker registry host name
-  displayName: Site domain
-  name: DOCKER_REGISTRY_HOST
-  required: true
-  value: docker-registry.default.svc
+        containers:
+        - name: descheduler
+          image: descheduler
+          volumeMounts:
+          - mountPath: /policy-dir
+            name: policy-volume
+          command:
+          - "/bin/sh"
+          - "-ec"
+          - |
+            /bin/descheduler --policy-config-file /policy-dir/policy.yaml
+        restartPolicy: "Never"
+        serviceAccountName: descheduler-sa
+        volumes:
+        - name: policy-volume
+          configMap:
+            name: descheduler-policy-configmap
 ```
 
 Please note that the pod template is configured with critical pod annotation, and
@@ -173,7 +156,7 @@ the policy `policy-file` is mounted as a volume from the config map.
 
 ### Run the descheduler as a job in a pod:
 ```
-$ oc create -f descheduler-cronjob.yaml -n kube-system
+$ kubectl create -f descheduler-job.yaml
 ```
 
 ## Policy and Strategies
@@ -302,18 +285,11 @@ This roadmap is not in any particular order.
 
 Descheduler  | supported Kubernetes version
 -------------|-----------------------------
-0.4+          | 1.9+
+0.4          | 1.9+
 0.1-0.3      | 1.7-1.8
 
-## Community, discussion, contribution, and support
+## Note
 
-Learn how to engage with the Kubernetes community on the [community page](http://kubernetes.io/community/).
-
-You can reach the maintainers of this project at:
-
-- [Slack channel](https://kubernetes.slack.com/messages/sig-scheduling)
-- [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-scheduling)
-
-### Code of conduct
-
-Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
+This project is under active development, and is not intended for production use.
+Any api could be changed any time with out any notice. That said, your feedback is
+very important and appreciated to make this project more stable and useful.

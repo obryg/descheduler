@@ -37,7 +37,6 @@ func BuildTestPod(name string, cpu int64, memory int64, nodeName string) *v1.Pod
 				{
 					Resources: v1.ResourceRequirements{
 						Requests: v1.ResourceList{},
-						Limits:   v1.ResourceList{},
 					},
 				},
 			},

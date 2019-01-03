@@ -11,15 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM golang:1.10.7
-
-MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
+FROM golang:1.9.2
 
 WORKDIR /go/src/github.com/kubernetes-incubator/descheduler
 COPY . .
 RUN make
 
-#Copy descheduler to bin
-RUN cp -r _output/bin/descheduler /bin/; rm -rf _output;
+FROM scratch
+
+MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
+
+COPY --from=0 /go/src/github.com/kubernetes-incubator/descheduler/_output/bin/descheduler /bin/descheduler
 
 CMD ["/bin/descheduler", "--help"]
