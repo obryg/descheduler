@@ -1,4 +1,4 @@
-FROM rhel7:7-released
+FROM centos:7
 
 MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
 
