@@ -1,27 +1,20 @@
-# Copyright 2017 The Kubernetes Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-FROM golang:1.10.7
+FROM rhel7:7-released
 
 MAINTAINER Avesh Agarwal <avagarwa@redhat.com>
 
-WORKDIR /go/src/github.com/kubernetes-incubator/descheduler
-COPY . .
+ENV container=docker
 
-#Build descheduler binary
-RUN make
+LABEL vendor="Red Hat, Inc." \
+      com.redhat.component="atomic-openshift-descheduler-docker" \
+      name="openshift3/descheduler" \
+      version="0.4.0" \
+      release="1" \
+      architecture="x86_64" \
+      Summary="Descheduler for Opensift and Kubernetes"
 
-#Copy descheduler to bin and remove output folder
-RUN cp -r _output/bin/descheduler /bin/; rm -rf _output;
+RUN INSTALL_PKGS="atomic-openshift-descheduler" && \
+    yum install -y ${INSTALL_PKGS} && \
+    rpm -V ${INSTALL_PKGS} && \
+    yum clean all
 
-CMD ["/bin/descheduler", "--help"]
+CMD /usr/bin/descheduler
